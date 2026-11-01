@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SHELLFORGE</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+</head>
+<body>
+  <div id="app">
+
+    <aside class="sidebar">
+      <div class="brand">
+        <svg class="brand-icon" viewBox="0 0 24 24" width="22" height="22" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+          <path d="M12 2 2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+        <div class="brand-text">
+          <span class="brand-name">SHELLFORGE</span>
+          <span class="brand-tag">payload forge · handler</span>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item active" data-view="sessions">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <rect x="3" y="4" width="18" height="6" rx="2"/>
+            <rect x="3" y="14" width="18" height="6" rx="2"/>
+          </svg>
+          <span>Sessions</span>
+          <span class="badge" id="session-count">0</span>
+        </button>
+        <button class="nav-item" data-view="payloads">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <polyline points="16 18 22 12 16 6"/>
+            <polyline points="8 6 2 12 8 18"/>
+          </svg>
+          <span>Payloads</span>
+        </button>
+        <button class="nav-item" data-view="listener">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+            <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+            <circle cx="12" cy="20" r="1"/>
+          </svg>
+          <span>Listener</span>
+          <span class="status-dot" id="listener-status"></span>
+        </button>
+      </nav>
+
+      <div class="mini-sessions-wrap">
+        <div class="mini-title">Active</div>
+        <div class="mini-sessions" id="mini-sessions"></div>
+      </div>
+
+      <div class="sidebar-footer">
+        <span>v1.0</span>
+        <span class="dim">·</span>
+        <span>by DEDSEC</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <h1 id="view-title">Sessions</h1>
+        <div class="topbar-right">
+          <span class="ws-status" id="ws-status">
+            <span class="ws-dot"></span>
+            <span class="ws-label">Connecting…</span>
+          </span>
+        </div>
+      </header>
+
+      <!-- sessions view -->
+      <section id="view-sessions" class="view active">
+        <div class="empty-state" id="sessions-empty">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="none"
+               stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <rect x="3" y="4" width="18" height="6" rx="2"/>
+            <rect x="3" y="14" width="18" height="6" rx="2"/>
+          </svg>
+          <h3>No sessions yet</h3>
+          <p>Start a listener and drop a generated payload on a target.</p>
+          <button class="btn btn-primary" data-jump="listener">Go to Listener</button>
+        </div>
+        <div class="sessions-grid" id="sessions-grid"></div>
+      </section>
+
+      <!-- interact view -->
+      <section id="view-interact" class="view">
+        <div class="session-header">
+          <div class="session-header-info">
+            <div class="session-target" id="interact-target">—</div>
+            <div class="session-meta" id="interact-meta"></div>
+          </div>
+          <div class="session-header-actions">
+            <button class="btn btn-ghost" id="btn-info">Info</button>
+            <button class="btn btn-ghost" id="btn-download">Download</button>
+            <button class="btn btn-ghost" id="btn-upload">Upload</button>
+            <button class="btn btn-danger" id="btn-kill">Kill</button>
+          </div>
+        </div>
+        <div class="terminal" id="terminal"></div>
+        <div class="command-bar">
+          <span class="prompt">$</span>
+          <input id="command-input" placeholder="exec ls -la" autocomplete="off" spellcheck="false" />
+          <button class="btn btn-primary" id="btn-send">Send</button>
+        </div>
+      </section>
+
+      <!-- payloads view -->
+      <section id="view-payloads" class="view">
+        <div class="payload-layout">
+
+          <aside class="payload-library">
+            <div class="payload-library-head">
+              <h3>Library</h3>
+              <button class="btn btn-sm btn-primary" id="btn-new-payload">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                New
+              </button>
+            </div>
+            <div class="payload-search-wrap">
+              <input id="payload-search" placeholder="Search payloads…" />
+            </div>
+            <div class="payload-list" id="payload-list"></div>
+          </aside>
+
+          <div class="payload-detail" id="payload-detail">
+            <div class="payload-empty" id="payload-empty">
+              <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+              </svg>
+              <h3>Select a payload</h3>
+              <p>Choose from the library on the left, or create a custom one.</p>
+            </div>
+
+            <div class="payload-body" id="payload-body" hidden>
+              <div class="payload-body-head">
+                <div>
+                  <h2 id="pd-name">—</h2>
+                  <p id="pd-description" class="dim">—</p>
+                </div>
+                <div class="payload-badges" id="pd-badges"></div>
+              </div>
+
+              <div class="payload-meta-grid" id="pd-meta"></div>
+
+              <div class="payload-config-wrap">
+                <div class="payload-config-title">Configuration</div>
+                <div class="payload-config-form" id="pd-form"></div>
+              </div>
+
+              <div class="payload-preview-wrap">
+                <div class="preview-header">
+                  <span class="preview-title">Payload code</span>
+                  <div class="preview-actions">
+                    <button class="btn btn-ghost btn-sm" id="pd-copy">Copy</button>
+                    <button class="btn btn-ghost btn-sm" id="pd-download">Download</button>
+                    <button class="btn btn-danger btn-sm" id="pd-delete" style="display:none">Delete</button>
+                  </div>
+                </div>
+                <pre id="pd-code"><code id="pd-code-inner"></code></pre>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- listener view -->
+      <section id="view-listener" class="view">
+        <div class="listener-card">
+          <h3>Listener</h3>
+          <p class="dim">Bind to a local interface and accept agent connections.</p>
+          <div class="field-row">
+            <div class="field">
+              <label>Host</label>
+              <input id="listener-host" value="0.0.0.0" />
+            </div>
+            <div class="field">
+              <label>Port</label>
+              <input id="listener-port" type="number" value="4444" />
+            </div>
+          </div>
+          <div class="field">
+            <label>XOR key <span class="dim">(optional)</span></label>
+            <input id="listener-key" placeholder="hunter2" />
+          </div>
+          <div class="listener-actions">
+            <button class="btn btn-primary" id="btn-start-listener">Start listener</button>
+            <button class="btn btn-danger" id="btn-stop-listener" disabled>Stop</button>
+          </div>
+          <div class="listener-current" id="listener-current">Not running</div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- modal: new custom payload -->
+  <div class="modal" id="modal-new-payload" hidden>
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>Create Custom Payload</h2>
+        <button class="modal-close" data-close-modal>×</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label>Name</label>
+          <input id="np-name" placeholder="my-custom-agent" />
+        </div>
+        <div class="field">
+          <label>Description <span class="dim">(optional)</span></label>
+          <input id="np-description" placeholder="Short summary" />
+        </div>
+        <div class="field">
+          <label>Base template</label>
+          <select id="np-base"></select>
+        </div>
+        <div class="field">
+          <label>Default LHOST / LPORT</label>
+          <div class="field-row">
+            <input id="np-lhost" placeholder="127.0.0.1" value="127.0.0.1" />
+            <input id="np-lport" type="number" placeholder="4444" value="4444" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Extra header comment <span class="dim">(optional)</span></label>
+          <textarea id="np-header" rows="3" placeholder="Prepended above the payload code"></textarea>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" data-close-modal>Cancel</button>
+        <button class="btn btn-primary" id="btn-save-payload">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toasts" class="toasts"></div>
+
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
